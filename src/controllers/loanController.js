@@ -166,3 +166,25 @@ export const getLoanStatistics = asyncHandler(async (req, res) => {
 
   sendResponse(res, 200, "Statistik peminjaman berhasil diambil", stats);
 });
+
+// Delete loan
+export const deleteLoan = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const loan = await LoanService.getLoanById(id);
+  if (!loan) {
+    return sendErrorResponse(res, 404, "Peminjaman tidak ditemukan");
+  }
+
+  if (loan.status !== "PENDING") {
+    return sendErrorResponse(
+      res,
+      400,
+      "Hanya peminjaman dengan status PENDING yang dapat dihapus",
+    );
+  }
+
+  await LoanService.deleteLoan(id);
+
+  sendResponse(res, 200, "Peminjaman berhasil dihapus");
+});

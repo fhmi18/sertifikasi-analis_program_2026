@@ -246,4 +246,23 @@ export class LoanService {
       returned,
     };
   }
+
+  // Delete loan (only PENDING status can be deleted)
+  static async deleteLoan(id) {
+    const loan = await this.getLoanById(id);
+
+    if (!loan) {
+      throw new Error("Peminjaman tidak ditemukan");
+    }
+
+    if (loan.status !== "PENDING") {
+      throw new Error(
+        "Hanya peminjaman dengan status PENDING yang dapat dihapus",
+      );
+    }
+
+    return await prisma.loan.delete({
+      where: { id: parseInt(id) },
+    });
+  }
 }

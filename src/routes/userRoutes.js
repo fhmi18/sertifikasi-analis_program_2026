@@ -8,16 +8,8 @@ const router = express.Router();
 router.use(authenticate);
 
 // Get users
-router.get(
-  "/",
-  checkRole("ADMIN", "PETUGAS_INVENTARIS"),
-  userController.getAllUsers,
-);
-router.get(
-  "/search",
-  checkRole("ADMIN", "PETUGAS_INVENTARIS"),
-  userController.searchUsers,
-);
+router.get("/", userController.getAllUsers);
+router.get("/search", userController.searchUsers);
 router.get("/statistics", checkRole("ADMIN"), userController.getUserStatistics);
 router.get("/:id", userController.getUserById);
 

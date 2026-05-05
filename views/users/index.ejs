@@ -7,6 +7,7 @@
         <title>Manajemen User - IMS</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <script src="/js/auth.js"></script>
     </head>
 
     <body class="bg-gray-50">
@@ -44,7 +45,7 @@
                             <h1 class="text-3xl font-bold text-gray-900">Manajemen User</h1>
                             <p class="text-gray-600 mt-2">Kelola akun user sistem</p>
                         </div>
-                        <button onclick="openCreateModal()"
+                        <button id="addUserBtn" onclick="openCreateModal()"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                             <i class="fas fa-plus"></i> Tambah User
                         </button>
@@ -174,6 +175,11 @@
                                 }
                             });
 
+                            if (response.status === 403) {
+                                handleForbiddenError('Anda tidak memiliki akses ke fitur ini');
+                                return;
+                            }
+
                             if (!response.ok) throw new Error('Failed to load users');
 
                             const data = await response.json();
@@ -265,25 +271,16 @@
                     }
 
                     // Fungsi untuk mengecek apakah user yang login adalah Admin berdasarkan JWT token
-                    function checkIsAdmin() {
-                        const token = localStorage.getItem('token');
-                        if (!token) return false;
-                        try {
-                            const base64Url = token.split('.')[1];
-                            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-                                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                            }).join(''));
-                            return JSON.parse(jsonPayload).role === 'ADMIN';
-                        } catch (e) {
-                            console.error('Error parsing token:', e);
-                            return false;
+                    function initializeAuth() {
+                        const addUserBtn = document.getElementById('addUserBtn');
+                        if (addUserBtn && !canManageUsers()) {
+                            addUserBtn.style.display = 'none';
                         }
                     }
 
                     function openCreateModal() {
-                        if (!checkIsAdmin()) {
-                            alert('Akses Ditolak: Hanya Admin yang dapat membuat user baru.');
+                        if (!canManageUsers()) {
+                            showAuthError('Hanya Admin yang dapat membuat user baru.', '/users');
                             return;
                         }
                         editingUserId = null;
@@ -295,8 +292,8 @@
                     }
 
                     function openEditModal(id, username, email, fullName, role) {
-                        if (!checkIsAdmin()) {
-                            alert('Akses Ditolak: Hanya Admin yang dapat mengubah data user.');
+                        if (!canManageUsers()) {
+                            showAuthError('Hanya Admin yang dapat mengubah data user.', '/users');
                             return;
                         }
                         editingUserId = id;
@@ -317,8 +314,8 @@
                     }
 
                     function openDeleteModal(id) {
-                        if (!checkIsAdmin()) {
-                            alert('Akses Ditolak: Hanya Admin yang dapat menghapus user.');
+                        if (!canManageUsers()) {
+                            showAuthError('Hanya Admin yang dapat menghapus user.', '/users');
                             return;
                         }
                         userToDelete = id;
@@ -379,6 +376,12 @@
                                 }
                             });
 
+                            if (response.status === 403) {
+                                handleForbiddenError('Anda tidak memiliki izin untuk menghapus user');
+                                closeDeleteModal();
+                                return;
+                            }
+
                             if (!response.ok) throw new Error('Gagal menghapus');
 
                             closeDeleteModal();
@@ -428,6 +431,7 @@
                         setTimeout(() => toast.remove(), 3000);
                     }
 
+                    initializeAuth();
                     loadUsers(1);
                 </script>
             </main>

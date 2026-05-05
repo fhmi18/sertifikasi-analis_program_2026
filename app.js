@@ -106,7 +106,7 @@ app.get("/loans", (req, res) => {
   res.render("loans/index", { title: "Manajemen Peminjaman" });
 });
 
-// Users view routes
+// Users view routes - ADMIN only
 app.get("/users", (req, res) => {
   res.render("users/index", { title: "Manajemen User" });
 });

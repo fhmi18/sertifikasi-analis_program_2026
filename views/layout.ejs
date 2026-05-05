@@ -16,6 +16,7 @@
                 margin-left: -250px;
             }
         </style>
+        <script src="/js/auth.js"></script>
     </head>
 
     <body class="bg-gray-50">
@@ -65,7 +66,7 @@
                             📊 Laporan
                         </a>
                     </li>
-                    <li>
+                    <li id="userMenuLink">
                         <a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800 transition">
                             👥 User
                         </a>
@@ -85,6 +86,17 @@
         </div>
 
         <script>
+            // Hide Users menu for non-ADMIN roles
+            function initializeAuthUI() {
+                const userMenuLink = document.getElementById('userMenuLink');
+                if (userMenuLink && !canManageUsers()) {
+                    userMenuLink.style.display = 'none';
+                }
+            }
+
+            // Initialize auth UI on page load
+            document.addEventListener('DOMContentLoaded', initializeAuthUI);
+
             // Sidebar toggle
             document.getElementById('toggleSidebar').addEventListener('click', function () {
                 document.getElementById('sidebar').classList.toggle('collapsed');

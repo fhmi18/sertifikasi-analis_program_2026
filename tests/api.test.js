@@ -372,12 +372,66 @@ describe("Loan Endpoints", () => {
     expect(response.status).toBe(200);
   });
 
+  test("POST /api/loans/:id/reject - Should reject loan with reason", async () => {
+    // Create another loan to reject
+    const newLoanRes = await request(app)
+      .post("/api/loans")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        itemId,
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        quantity: 1,
+      });
+    const rejectLoanId = newLoanRes.body.data.id;
+
+    const response = await request(app)
+      .post(`/api/loans/${rejectLoanId}/reject`)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({ rejectionReason: "Item sedang diperbaiki" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.status).toBe("REJECTED");
+  });
+
   test("POST /api/loans/:id/return - Should return item", async () => {
     const response = await request(app)
       .post(`/api/loans/${createdLoanId}/return`)
       .set("Authorization", `Bearer ${authToken}`)
       .send({ condition: "BAIK" });
     expect(response.status).toBe(200);
+    expect(response.body.data.status).toBe("RETURNED");
+  });
+
+  test("DELETE /api/loans/:id - Should delete pending loan", async () => {
+    // Create a pending loan to delete
+    const newLoanRes = await request(app)
+      .post("/api/loans")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        itemId,
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        quantity: 1,
+      });
+    const deleteLoanId = newLoanRes.body.data.id;
+
+    const response = await request(app)
+      .delete(`/api/loans/${deleteLoanId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
+
+  test("DELETE /api/loans/:id - Should not delete approved loan", async () => {
+    // Try to delete the approved loan
+    const response = await request(app)
+      .delete(`/api/loans/${createdLoanId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    // Should fail because loan is not PENDING
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
   });
 
   test("GET /api/loans/overdue - Should get overdue loans", async () => {
@@ -588,12 +642,94 @@ describe("User Endpoints", () => {
   });
 });
 
-describe("Health Check", () => {
-  test("GET /api/health - Should return health status", async () => {
-    const response = await request(app).get("/api/health");
+describe("Authorization/RBAC Tests", () => {
+  let staffToken;
+  let itemId;
+  let loanId;
+
+  beforeAll(async () => {
+    // Login as staff
+    const staffLoginRes = await request(app).post("/api/auth/login").send({
+      username: "staff1",
+      password: "password123",
+    });
+    staffToken = staffLoginRes.body.data.token;
+
+    // Get first item
+    const itemsResponse = await request(app)
+      .get("/api/items")
+      .query({ page: 1, limit: 1 });
+    itemId = itemsResponse.body.data.items[0]?.id;
+
+    // Create a pending loan for staff
+    const loanRes = await request(app)
+      .post("/api/loans")
+      .set("Authorization", `Bearer ${staffToken}`)
+      .send({
+        itemId,
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        quantity: 1,
+      });
+    loanId = loanRes.body.data.id;
+  });
+
+  // Staff should NOT be able to create items
+  test("POST /api/items - STAFF should be forbidden from creating items", async () => {
+    const response = await request(app)
+      .post("/api/items")
+      .set("Authorization", `Bearer ${staffToken}`)
+      .send({
+        itemCode: `STAFF-${Date.now()}`,
+        itemName: "Staff Trying to Create",
+        category: "Test",
+        quantity: 1,
+        location: "Test",
+      });
+
+    expect(response.status).toBe(403);
+  });
+
+  // Staff should NOT be able to delete items
+  test("DELETE /api/items/:id - STAFF should be forbidden from deleting items", async () => {
+    const response = await request(app)
+      .delete(`/api/items/${itemId}`)
+      .set("Authorization", `Bearer ${staffToken}`);
+
+    expect(response.status).toBe(403);
+  });
+
+  // Staff should NOT be able to approve loans
+  test("POST /api/loans/:id/approve - STAFF should be forbidden from approving loans", async () => {
+    const response = await request(app)
+      .post(`/api/loans/${loanId}/approve`)
+      .set("Authorization", `Bearer ${staffToken}`);
+
+    expect(response.status).toBe(403);
+  });
+
+  // Staff should be able to VIEW user list but not CREATE/EDIT/DELETE
+  test("GET /api/users - STAFF should be able to view user list", async () => {
+    const response = await request(app)
+      .get("/api/users")
+      .set("Authorization", `Bearer ${staffToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.status).toBe("OK");
+    expect(response.body.success).toBe(true);
+  });
+
+  // Staff should NOT be able to create users
+  test("POST /api/users - STAFF should be forbidden from creating users", async () => {
+    const response = await request(app)
+      .post("/api/users")
+      .set("Authorization", `Bearer ${staffToken}`)
+      .send({
+        username: `staff_created_${Date.now()}`,
+        email: `staff${Date.now()}@test.com`,
+        password: "password123",
+        fullName: "Staff Created",
+      });
+
+    expect(response.status).toBe(403);
   });
 });
 

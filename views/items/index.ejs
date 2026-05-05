@@ -7,6 +7,7 @@
         <title>Manajemen Barang - Inventory Management System</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <script src="/js/auth.js"></script>
     </head>
 
     <body class="bg-gray-50">
@@ -43,7 +44,7 @@
                             <h1 class="text-3xl font-bold text-gray-900">Manajemen Barang</h1>
                             <p class="text-gray-600 mt-2">Kelola inventaris peralatan kantor</p>
                         </div>
-                        <button onclick="window.location.href='/items/new'"
+                        <button id="addItemBtn" onclick="window.location.href='/items/new'"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                             <i class="fas fa-plus"></i> Tambah Barang
                         </button>
@@ -141,6 +142,14 @@
             let currentPage = 1;
             let itemToDelete = null;
 
+            // Initialize - check authorization and hide elements
+            function initializeAuth() {
+                const addItemBtn = document.getElementById('addItemBtn');
+                if (!canManageItems()) {
+                    addItemBtn.style.display = 'none';
+                }
+            }
+
             // Logout function
             async function logout() {
                 try {
@@ -177,6 +186,12 @@
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     });
+
+                    if (response.status === 403) {
+                        handleForbiddenError('Anda tidak memiliki akses ke fitur ini');
+                        return;
+                    }
+
                     if (!response.ok) throw new Error('Failed to load items');
 
                     const data = await response.json();
@@ -206,35 +221,48 @@
                     return;
                 }
 
-                tbody.innerHTML = items.map(item => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.itemCode}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${item.itemName}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.category}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${item.quantity}</td>
-                    <td class="px-6 py-4 text-sm">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${item.condition === 'BAIK' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${item.condition}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}">
-                            ${item.status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm flex gap-2">
-                        <a href="/items/${item.id}" class="text-blue-600 hover:text-blue-800">
+                const canManage = canManageItems();
+
+                tbody.innerHTML = items.map(item => {
+                    let actionsHtml = `
+                        <a href="/items/${item.id}" class="text-blue-600 hover:text-blue-800" title="Lihat detail">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="/items/${item.id}/edit" class="text-yellow-600 hover:text-yellow-800">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <button onclick="openDeleteModal(${item.id}, '${item.itemName}')" class="text-red-600 hover:text-red-800">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+                    `;
+
+                    if (canManage) {
+                        actionsHtml += `
+                            <a href="/items/${item.id}/edit" class="text-yellow-600 hover:text-yellow-800" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button onclick="openDeleteModal(${item.id}, '${item.itemName}')" class="text-red-600 hover:text-red-800" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                    }
+
+                    return `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.itemCode}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${item.itemName}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">${item.category}</td>
+                            <td class="px-6 py-4 text-sm font-semibold text-gray-900">${item.quantity}</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold ${item.condition === 'BAIK' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${item.condition}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}">
+                                    ${item.status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm flex gap-2">
+                                ${actionsHtml}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
             function renderPagination(pagination) {
@@ -289,6 +317,12 @@
                         }
                     });
 
+                    if (response.status === 403) {
+                        handleForbiddenError('Anda tidak memiliki izin untuk menghapus barang');
+                        closeDeleteModal();
+                        return;
+                    }
+
                     if (!response.ok) throw new Error('Failed to delete');
 
                     closeDeleteModal();
@@ -296,7 +330,7 @@
                     loadItems(currentPage);
                 } catch (error) {
                     console.error('Error:', error);
-                    showError('Gagal menghapus barang');
+                    showError('Gagal menghapus barang: ' + error.message);
                 }
             }
 
@@ -321,6 +355,7 @@
             }
 
             // Load items immediately when page loads
+            initializeAuth();
             loadItems();
         </script>
     </body>

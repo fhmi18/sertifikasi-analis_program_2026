@@ -44,5 +44,10 @@ router.post(
   checkRole("PETUGAS_INVENTARIS", "ADMIN", "STAFF"),
   loanController.returnItem,
 );
+router.delete(
+  "/:id",
+  checkRole("STAFF", "PETUGAS_INVENTARIS", "ADMIN"),
+  loanController.deleteLoan,
+);
 
 export default router;
