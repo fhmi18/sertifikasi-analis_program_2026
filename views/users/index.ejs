@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Manajemen User - IMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-gray-800">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg bg-blue-600">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900">Manajemen User</h1>
+                            <p class="text-gray-600 mt-2">Kelola akun user sistem</p>
+                        </div>
+                        <button onclick="openCreateModal()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Tambah User
+                        </button>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="bg-white rounded-lg shadow mb-6 p-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="searchInput" placeholder="Cari user..."
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="searchUsers()"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-search"></i> Cari
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama
+                                        Lengkap
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="usersTableBody">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-6 flex justify-between items-center">
+                        <div id="paginationInfo" class="text-gray-600"></div>
+                        <div class="flex gap-2" id="paginationButtons"></div>
+                    </div>
+                </div>
+
+                <!-- User Modal -->
+                <div id="userModal"
+                    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4" id="modalTitle">Tambah User</h3>
+
+                        <form id="userForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" id="username" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="email" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input type="text" id="fullName" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div id="passwordField">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input type="password" id="password"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                <select id="role"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="STAFF">Staff</option>
+                                    <option value="PETUGAS_INVENTARIS">Petugas Inventaris</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" onclick="closeUserModal()"
+                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-3 py-2 rounded-lg">Batal</button>
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Delete Modal -->
+                <div id="deleteModal"
+                    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-96">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Hapus User?</h3>
+                        <p class="text-gray-600 mb-4">Apakah Anda yakin ingin menghapus user ini?</p>
+                        <div class="flex gap-3">
+                            <button onclick="closeDeleteModal()"
+                                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg">Batal</button>
+                            <button onclick="confirmDelete()"
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Hapus</button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    let currentPage = 1;
+                    let editingUserId = null;
+                    let userToDelete = null;
+
+                    async function loadUsers(page = 1) {
+                        try {
+                            const response = await fetch(`/api/users?page=${page}&limit=10`, {
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Failed to load users');
+
+                            const data = await response.json();
+                            const responseData = data.data || {};
+                            const users = Array.isArray(responseData) ? responseData : (responseData.users ||
+                                responseData
+                                .data || []);
+                            const pagination = responseData.pagination || data.pagination || null;
+
+                            currentPage = page;
+                            renderUsers(users);
+                            if (pagination) renderPagination(pagination);
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError('Gagal memuat data user');
+                            const tbody = document.getElementById('usersTableBody');
+                            if (tbody) tbody.innerHTML =
+                                `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Gagal memuat data: ${error.message}</td></tr>`;
+                        }
+                    }
+
+                    function renderUsers(users) {
+                        const tbody = document.getElementById('usersTableBody');
+
+                        if (users.length === 0) {
+                            tbody.innerHTML =
+                                '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Tidak ada user</td></tr>';
+                            return;
+                        }
+
+                        tbody.innerHTML = users.map(user => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${user.username}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${user.email}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${user.fullName}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${getRoleColor(user.role)}">
+                            ${user.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${user.isActive ? 'Aktif' : 'Nonaktif'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm flex gap-2">
+                        <button onclick="openEditModal(${user.id}, '${user.username}', '${user.email}', '${user.fullName}', '${user.role}')" class="text-yellow-600 hover:text-yellow-800">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="openDeleteModal(${user.id})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+                    }
+
+                    function renderPagination(pagination) {
+                        const info = document.getElementById('paginationInfo');
+                        const buttons = document.getElementById('paginationButtons');
+
+                        info.textContent =
+                            `Menampilkan ${(pagination.page - 1) * pagination.limit + 1} - ${Math.min(pagination.page * pagination.limit, pagination.total)} dari ${pagination.total} user`;
+
+                        buttons.innerHTML = '';
+                        if (pagination.page > 1) {
+                            buttons.innerHTML +=
+                                `<button onclick="loadUsers(${pagination.page - 1})" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Sebelumnya</button>`;
+                        }
+
+                        for (let i = 1; i <= pagination.pages; i++) {
+                            buttons.innerHTML +=
+                                `<button onclick="loadUsers(${i})" class="px-4 py-2 border border-gray-300 rounded-lg ${i === pagination.page ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}">${i}</button>`;
+                        }
+
+                        if (pagination.page < pagination.pages) {
+                            buttons.innerHTML +=
+                                `<button onclick="loadUsers(${pagination.page + 1})" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Selanjutnya</button>`;
+                        }
+                    }
+
+                    function getRoleColor(role) {
+                        const colors = {
+                            'ADMIN': 'bg-red-100 text-red-800',
+                            'PETUGAS_INVENTARIS': 'bg-blue-100 text-blue-800',
+                            'STAFF': 'bg-green-100 text-green-800'
+                        };
+                        return colors[role] || 'bg-gray-100 text-gray-800';
+                    }
+
+                    // Fungsi untuk mengecek apakah user yang login adalah Admin berdasarkan JWT token
+                    function checkIsAdmin() {
+                        const token = localStorage.getItem('token');
+                        if (!token) return false;
+                        try {
+                            const base64Url = token.split('.')[1];
+                            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                            }).join(''));
+                            return JSON.parse(jsonPayload).role === 'ADMIN';
+                        } catch (e) {
+                            console.error('Error parsing token:', e);
+                            return false;
+                        }
+                    }
+
+                    function openCreateModal() {
+                        if (!checkIsAdmin()) {
+                            alert('Akses Ditolak: Hanya Admin yang dapat membuat user baru.');
+                            return;
+                        }
+                        editingUserId = null;
+                        document.getElementById('modalTitle').textContent = 'Tambah User';
+                        document.getElementById('passwordField').classList.remove('hidden');
+                        document.getElementById('password').required = true;
+                        document.getElementById('userForm').reset();
+                        document.getElementById('userModal').classList.remove('hidden');
+                    }
+
+                    function openEditModal(id, username, email, fullName, role) {
+                        if (!checkIsAdmin()) {
+                            alert('Akses Ditolak: Hanya Admin yang dapat mengubah data user.');
+                            return;
+                        }
+                        editingUserId = id;
+                        document.getElementById('modalTitle').textContent = 'Edit User';
+                        document.getElementById('passwordField').classList.add('hidden');
+                        document.getElementById('password').required = false;
+                        document.getElementById('username').value = username;
+                        document.getElementById('email').value = email;
+                        document.getElementById('fullName').value = fullName;
+                        document.getElementById('role').value = role;
+                        document.getElementById('password').value = '';
+                        document.getElementById('userModal').classList.remove('hidden');
+                    }
+
+                    function closeUserModal() {
+                        document.getElementById('userModal').classList.add('hidden');
+                        editingUserId = null;
+                    }
+
+                    function openDeleteModal(id) {
+                        if (!checkIsAdmin()) {
+                            alert('Akses Ditolak: Hanya Admin yang dapat menghapus user.');
+                            return;
+                        }
+                        userToDelete = id;
+                        document.getElementById('deleteModal').classList.remove('hidden');
+                    }
+
+                    function closeDeleteModal() {
+                        document.getElementById('deleteModal').classList.add('hidden');
+                        userToDelete = null;
+                    }
+
+                    document.getElementById('userForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+
+                        const formData = {
+                            username: document.getElementById('username').value,
+                            email: document.getElementById('email').value,
+                            fullName: document.getElementById('fullName').value,
+                            role: document.getElementById('role').value
+                        };
+
+                        if (!editingUserId) {
+                            formData.password = document.getElementById('password').value;
+                        }
+
+                        try {
+                            const url = editingUserId ? `/api/users/${editingUserId}` : '/api/users';
+                            const method = editingUserId ? 'PUT' : 'POST';
+
+                            const response = await fetch(url, {
+                                method: method,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify(formData)
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) throw new Error(data.message || 'Gagal menyimpan data');
+
+                            showSuccess(editingUserId ? 'User berhasil diperbarui' :
+                                'User berhasil ditambahkan');
+                            closeUserModal();
+                            loadUsers(currentPage);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    });
+
+                    async function confirmDelete() {
+                        try {
+                            const response = await fetch(`/api/users/${userToDelete}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Gagal menghapus');
+
+                            closeDeleteModal();
+                            showSuccess('User berhasil dihapus');
+                            loadUsers(currentPage);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    }
+
+                    async function searchUsers() {
+                        const query = document.getElementById('searchInput').value;
+                        if (!query) {
+                            loadUsers(1);
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Gagal mencari');
+
+                            const data = await response.json();
+                            renderUsers(data.data.users || []);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    }
+
+                    function showSuccess(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    function showError(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    loadUsers(1);
+                </script>
+            </main>
+        </div>
+        <script>
+            async function logout() {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        </script>
+    </body>
+
+</html>

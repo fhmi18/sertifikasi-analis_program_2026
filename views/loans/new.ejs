@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Request Peminjaman - IMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-gray-800">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg bg-blue-600">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-6">Request Peminjaman Barang</h1>
+
+                        <form id="loanForm" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Barang <span
+                                        class="text-red-600">*</span></label>
+                                <select id="itemId" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Loading barang...</option>
+                                </select>
+                                <div id="itemInfo" class="mt-3 p-3 bg-gray-50 rounded-lg hidden">
+                                    <p class="text-sm text-gray-700"><span class="font-medium">Ketersediaan:</span>
+                                        <span id="itemQty">-</span></p>
+                                    <p class="text-sm text-gray-700"><span class="font-medium">Kondisi:</span> <span
+                                            id="itemCondition">-</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah yang Dipinjam
+                                        <span class="text-red-600">*</span></label>
+                                    <input type="number" id="quantity" min="1" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="1">
+                                    <span class="text-red-600 text-sm mt-1 hidden" id="quantityError"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kembali <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="date" id="dueDate" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <span class="text-red-600 text-sm mt-1 hidden" id="dueDateError"></span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan/Keperluan</label>
+                                <textarea id="notes" rows="4"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Jelaskan keperluan peminjaman barang..."></textarea>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" onclick="window.history.back()"
+                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-medium">Batal</button>
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Kirim
+                                    Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    const form = document.getElementById('loanForm');
+
+                    // Load available items
+                    async function loadItems() {
+                        try {
+                            const response = await fetch('/api/items/available?limit=100');
+                            if (!response.ok) throw new Error('Gagal memuat barang');
+
+                            const data = await response.json();
+                            const items = data.data.items || [];
+
+                            const select = document.getElementById('itemId');
+                            select.innerHTML = '<option value="">Pilih Barang</option>';
+                            items.forEach(item => {
+                                const option = document.createElement('option');
+                                option.value = item.id;
+                                option.textContent =
+                                    `${item.itemCode} - ${item.itemName} (${item.quantity} tersedia)`;
+                                select.appendChild(option);
+                            });
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError('Gagal memuat data barang');
+                        }
+                    }
+
+                    // Show item info when selected
+                    document.getElementById('itemId').addEventListener('change', async (e) => {
+                        if (!e.target.value) {
+                            document.getElementById('itemInfo').classList.add('hidden');
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`/api/items/${e.target.value}`);
+                            if (!response.ok) throw new Error('Gagal memuat detail barang');
+
+                            const data = await response.json();
+                            const item = data.data;
+
+                            document.getElementById('itemQty').textContent = item.quantity;
+                            document.getElementById('itemCondition').textContent = item.condition;
+                            document.getElementById('itemInfo').classList.remove('hidden');
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                    // Set minimum date to today
+                    document.getElementById('dueDate').min = new Date().toISOString().split('T')[0];
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+
+                        document.querySelectorAll('[id$="Error"]').forEach(el => el.classList.add(
+                        'hidden'));
+
+                        const quantity = parseInt(document.getElementById('quantity').value);
+                        const dueDate = document.getElementById('dueDate').value;
+                        const itemId = document.getElementById('itemId').value;
+
+                        if (!itemId) {
+                            showError('Pilih barang terlebih dahulu');
+                            return;
+                        }
+
+                        if (quantity <= 0) {
+                            document.getElementById('quantityError').textContent =
+                                'Jumlah harus lebih dari 0';
+                            document.getElementById('quantityError').classList.remove('hidden');
+                            return;
+                        }
+
+                        if (!dueDate) {
+                            document.getElementById('dueDateError').textContent =
+                                'Tanggal kembali harus diisi';
+                            document.getElementById('dueDateError').classList.remove('hidden');
+                            return;
+                        }
+
+                        const formData = {
+                            itemId: parseInt(itemId),
+                            quantity: quantity,
+                            dueDate: dueDate,
+                            notes: document.getElementById('notes').value || null
+                        };
+
+                        try {
+                            const response = await fetch('/api/loans', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify(formData)
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                throw new Error(data.message || 'Gagal membuat request');
+                            }
+
+                            showSuccess('Request peminjaman berhasil dikirim');
+                            setTimeout(() => {
+                                window.location.href = '/loans';
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError(error.message);
+                        }
+                    });
+
+                    function showSuccess(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    function showError(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    loadItems();
+                </script>
+            </main>
+        </div>
+        <script>
+            async function logout() {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        </script>
+    </body>
+
+</html>

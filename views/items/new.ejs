@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tambah Barang - IMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-gray-800">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg bg-blue-600">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-6">Tambah Barang Baru</h1>
+
+                        <form id="itemForm" class="space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kode Barang <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="text" id="itemCode" name="itemCode" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="KMP-001">
+                                    <span class="text-red-600 text-sm mt-1 hidden" id="itemCodeError"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="text" id="itemName" name="itemName" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Laptop">
+                                    <span class="text-red-600 text-sm mt-1 hidden" id="itemNameError"></span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="category" name="category" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="Elektronik">Elektronik</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Presentasi">Presentasi</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="number" id="quantity" name="quantity" min="1" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="5">
+                                    <span class="text-red-600 text-sm mt-1 hidden" id="quantityError"></span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kondisi <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="condition" name="condition" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Kondisi</option>
+                                        <option value="BAIK">Baik</option>
+                                        <option value="RUSAK">Rusak</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Status <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="status" name="status" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Status</option>
+                                        <option value="TERSEDIA">Tersedia</option>
+                                        <option value="DIPINJAM">Dipinjam</option>
+                                        <option value="MAINTENANCE">Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span
+                                        class="text-red-600">*</span></label>
+                                <input type="text" id="location" name="location" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Ruang IT">
+                                <span class="text-red-600 text-sm mt-1 hidden" id="locationError"></span>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
+                                <input type="number" id="price" name="price" min="0" step="0.01"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="0">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pembelian</label>
+                                <input type="date" id="purchaseDate" name="purchaseDate"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                                <textarea id="description" name="description" rows="4"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Deskripsi barang..."></textarea>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" onclick="window.history.back()"
+                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-medium">Batal</button>
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Simpan
+                                    Barang</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    const form = document.getElementById('itemForm');
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+
+                        // Clear previous errors
+                        document.querySelectorAll('[id$="Error"]').forEach(el => el.classList.add(
+                        'hidden'));
+
+                        const formData = {
+                            itemCode: document.getElementById('itemCode').value,
+                            itemName: document.getElementById('itemName').value,
+                            category: document.getElementById('category').value,
+                            quantity: parseInt(document.getElementById('quantity').value),
+                            condition: document.getElementById('condition').value,
+                            status: document.getElementById('status').value,
+                            location: document.getElementById('location').value,
+                            price: parseFloat(document.getElementById('price').value) || 0,
+                            purchaseDate: document.getElementById('purchaseDate').value || null,
+                            description: document.getElementById('description').value || null
+                        };
+
+                        // Validation
+                        if (!formData.itemCode.trim()) {
+                            document.getElementById('itemCodeError').textContent =
+                            'Kode barang harus diisi';
+                            document.getElementById('itemCodeError').classList.remove('hidden');
+                            return;
+                        }
+                        if (!formData.itemName.trim()) {
+                            document.getElementById('itemNameError').textContent =
+                            'Nama barang harus diisi';
+                            document.getElementById('itemNameError').classList.remove('hidden');
+                            return;
+                        }
+                        if (formData.quantity <= 0) {
+                            document.getElementById('quantityError').textContent =
+                                'Jumlah harus lebih dari 0';
+                            document.getElementById('quantityError').classList.remove('hidden');
+                            return;
+                        }
+                        if (!formData.location.trim()) {
+                            document.getElementById('locationError').textContent = 'Lokasi harus diisi';
+                            document.getElementById('locationError').classList.remove('hidden');
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch('/api/items', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify(formData)
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                throw new Error(data.message || 'Gagal menambah barang');
+                            }
+
+                            showSuccess('Barang berhasil ditambahkan');
+                            setTimeout(() => {
+                                window.location.href = '/items';
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError(error.message);
+                        }
+                    });
+
+                    function showSuccess(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    function showError(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    async function logout() {
+                        try {
+                            await fetch('/api/auth/logout', {
+                                method: 'POST'
+                            });
+                            localStorage.removeItem('token');
+                            window.location.href = '/login';
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+                </script>
+            </main>
+        </div>
+    </body>
+
+</html>

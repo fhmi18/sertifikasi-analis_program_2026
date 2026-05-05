@@ -1,0 +1,51 @@
+{
+  "name": "inventory-management-system",
+  "version": "1.0.0",
+  "description": "Office Equipment Inventory Management System built with Node.js, Express, MySQL, and Prisma",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "migrate": "npx prisma migrate dev",
+    "seed": "npx prisma db seed",
+    "studio": "npx prisma studio",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": [
+    "inventory",
+    "management",
+    "office",
+    "equipment"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "5.4.0",
+    "bcryptjs": "2.4.3",
+    "cors": "2.8.5",
+    "dotenv": "16.3.1",
+    "ejs": "3.1.8",
+    "express": "4.18.2",
+    "express-session": "1.17.3",
+    "jsonwebtoken": "9.0.2",
+    "morgan": "1.10.0",
+    "mysql2": "3.6.0",
+    "passport": "0.6.0",
+    "passport-jwt": "4.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.3",
+    "babel-jest": "^30.3.0",
+    "eslint": "8.52.0",
+    "jest": "29.7.0",
+    "nodemon": "3.0.1",
+    "supertest": "6.3.3"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

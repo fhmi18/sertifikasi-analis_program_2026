@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Barang - IMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-gray-800">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg bg-blue-600">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <div class="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-6">Edit Barang</h1>
+
+                        <form id="itemForm" class="space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kode Barang</label>
+                                    <input type="text" id="itemCode" disabled
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Barang <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="text" id="itemName" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Laptop">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="category" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="Elektronik">Elektronik</option>
+                                        <option value="Furniture">Furniture</option>
+                                        <option value="Presentasi">Presentasi</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah <span
+                                            class="text-red-600">*</span></label>
+                                    <input type="number" id="quantity" min="1" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="5">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kondisi <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="condition" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Kondisi</option>
+                                        <option value="BAIK">Baik</option>
+                                        <option value="RUSAK">Rusak</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Status <span
+                                            class="text-red-600">*</span></label>
+                                    <select id="status" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Pilih Status</option>
+                                        <option value="TERSEDIA">Tersedia</option>
+                                        <option value="DIPINJAM">Dipinjam</option>
+                                        <option value="MAINTENANCE">Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span
+                                        class="text-red-600">*</span></label>
+                                <input type="text" id="location" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Ruang IT">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
+                                <input type="number" id="price" min="0" step="0.01"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="0">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                                <textarea id="description" rows="4"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Deskripsi barang..."></textarea>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" onclick="window.history.back()"
+                                    class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-medium">Batal</button>
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">Simpan
+                                    Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    const itemId = window.location.pathname.split('/')[2];
+                    const form = document.getElementById('itemForm');
+
+                    async function loadItem() {
+                        try {
+                            const response = await fetch(`/api/items/${itemId}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+                            if (!response.ok) throw new Error('Gagal memuat barang');
+
+                            const data = await response.json();
+                            const item = data.data;
+
+                            document.getElementById('itemCode').value = item.itemCode;
+                            document.getElementById('itemName').value = item.itemName;
+                            document.getElementById('category').value = item.category;
+                            document.getElementById('quantity').value = item.quantity;
+                            document.getElementById('condition').value = item.condition;
+                            document.getElementById('status').value = item.status;
+                            document.getElementById('location').value = item.location;
+                            document.getElementById('price').value = item.price || 0;
+                            document.getElementById('description').value = item.description || '';
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError('Gagal memuat data barang');
+                        }
+                    }
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+
+                        const formData = {
+                            itemName: document.getElementById('itemName').value,
+                            category: document.getElementById('category').value,
+                            quantity: parseInt(document.getElementById('quantity').value),
+                            condition: document.getElementById('condition').value,
+                            status: document.getElementById('status').value,
+                            location: document.getElementById('location').value,
+                            price: parseFloat(document.getElementById('price').value) || 0,
+                            description: document.getElementById('description').value || null
+                        };
+
+                        try {
+                            const response = await fetch(`/api/items/${itemId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify(formData)
+                            });
+
+                            if (!response.ok) throw new Error('Gagal menyimpan perubahan');
+
+                            showSuccess('Barang berhasil diperbarui');
+                            setTimeout(() => {
+                                window.location.href = '/items';
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError(error.message);
+                        }
+                    });
+
+                    function showSuccess(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    function showError(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    async function logout() {
+                        try {
+                            await fetch('/api/auth/logout', {
+                                method: 'POST'
+                            });
+                            localStorage.removeItem('token');
+                            window.location.href = '/login';
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+
+                    loadItem();
+                </script>
+            </main>
+        </div>
+    </body>
+
+</html>

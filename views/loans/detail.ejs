@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Detail Peminjaman - IMS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation Bar -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-gray-800">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg bg-blue-600">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+
+                <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div class="bg-white rounded-lg shadow p-8">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start mb-8 pb-6 border-b">
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">Detail Peminjaman</h1>
+                                <p class="text-gray-600 mt-2" id="loanTitle">Loading...</p>
+                            </div>
+                            <span id="statusBadge"
+                                class="px-4 py-2 rounded-full text-sm font-semibold">Loading...</span>
+                        </div>
+
+                        <!-- Content -->
+                        <div id="content" class="hidden">
+                            <!-- Main Info -->
+                            <div class="grid grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Peminjam</h3>
+                                    <div class="space-y-2">
+                                        <p><span class="font-medium text-gray-700">Nama:</span> <span
+                                                id="borrowerName">-</span>
+                                        </p>
+                                        <p><span class="font-medium text-gray-700">Username:</span> <span
+                                                id="borrowerUsername">-</span></p>
+                                        <p><span class="font-medium text-gray-700">Email:</span> <span
+                                                id="borrowerEmail">-</span></p>
+                                        <p><span class="font-medium text-gray-700">Role:</span> <span
+                                                id="borrowerRole">-</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Informasi Barang</h3>
+                                    <div class="space-y-2">
+                                        <p><span class="font-medium text-gray-700">Kode Barang:</span> <span
+                                                id="itemCode">-</span></p>
+                                        <p><span class="font-medium text-gray-700">Nama Barang:</span> <span
+                                                id="itemName">-</span></p>
+                                        <p><span class="font-medium text-gray-700">Kategori:</span> <span
+                                                id="itemCategory">-</span></p>
+                                        <p><span class="font-medium text-gray-700">Jumlah Dipinjam:</span> <span
+                                                id="quantity">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Timeline -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Timeline Peminjaman</h3>
+                                <div class="space-y-4">
+                                    <div class="flex gap-4">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-4 h-4 bg-blue-600 rounded-full"></div>
+                                            <div class="w-0.5 h-12 bg-gray-300"></div>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Permintaan Dibuat</p>
+                                            <p class="text-gray-600 text-sm" id="createdDate">-</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-4" id="approvalTimeline" style="display: none;">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-4 h-4 bg-green-600 rounded-full"></div>
+                                            <div class="w-0.5 h-12 bg-gray-300"></div>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Disetujui</p>
+                                            <p class="text-gray-600 text-sm" id="approvalDate">-</p>
+                                            <p class="text-gray-600 text-sm">Oleh: <span id="approverName">-</span></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-4" id="returnTimeline" style="display: none;">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-4 h-4 bg-purple-600 rounded-full"></div>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Dikembalikan</p>
+                                            <p class="text-gray-600 text-sm" id="returnDate">-</p>
+                                            <p class="text-gray-600 text-sm">Kondisi: <span
+                                                    id="returnCondition">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dates -->
+                            <div class="bg-blue-50 rounded-lg p-6 mb-8">
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Tanggal Peminjaman</p>
+                                        <p class="text-xl font-bold text-gray-900" id="loanDate">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Jatuh Tempo</p>
+                                        <p class="text-xl font-bold" id="dueDate">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Catatan</h3>
+                                <p class="text-gray-700" id="notes">-</p>
+                            </div>
+
+                            <!-- Actions -->
+                            <div id="actionButtons" class="flex gap-3">
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loading" class="text-center py-12">
+                            <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-4"></i>
+                            <p class="text-gray-600">Memuat detail peminjaman...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Return Modal -->
+                <div id="returnModal"
+                    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-96">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Kembalikan Barang</h3>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kondisi Barang</label>
+                            <select id="returnCondition"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Pilih Kondisi</option>
+                                <option value="BAIK">Baik</option>
+                                <option value="RUSAK">Rusak</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="closeReturnModal()"
+                                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg">Batal</button>
+                            <button onclick="submitReturn()"
+                                class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Kembalikan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    let loanId = null;
+                    let currentLoan = null;
+
+                    // Extract loan ID from URL
+                    function getLoanId() {
+                        const pathArray = window.location.pathname.split('/');
+                        return pathArray[pathArray.length - 1];
+                    }
+
+                    async function loadLoan() {
+                        try {
+                            loanId = getLoanId();
+                            const response = await fetch(`/api/loans/${loanId}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Gagal memuat detail');
+
+                            const data = await response.json();
+                            currentLoan = data.data;
+
+                            renderLoan(currentLoan);
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showError('Gagal memuat detail peminjaman');
+                        }
+                    }
+
+                    function renderLoan(loan) {
+                        // Title
+                        document.getElementById('loanTitle').textContent =
+                            `Peminjaman #${loan.id} - ${loan.item?.itemName || 'N/A'}`;
+
+                        // Status badge
+                        const statusBadge = document.getElementById('statusBadge');
+                        statusBadge.textContent = loan.status;
+                        statusBadge.className =
+                            `px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(loan.status)}`;
+
+                        // Borrower info
+                        document.getElementById('borrowerName').textContent = (loan.user && loan.user.fullName) || '-';
+                        document.getElementById('borrowerUsername').textContent = (loan.user && loan.user.username) ||
+                            '-';
+                        document.getElementById('borrowerEmail').textContent = (loan.user && loan.user.email) || '-';
+                        document.getElementById('borrowerRole').textContent = (loan.user && loan.user.role) || '-';
+
+                        // Item info
+                        document.getElementById('itemCode').textContent = (loan.item && loan.item.itemCode) || '-';
+                        document.getElementById('itemName').textContent = (loan.item && loan.item.itemName) || '-';
+                        document.getElementById('itemCategory').textContent = (loan.item && loan.item.category) || '-';
+                        document.getElementById('quantity').textContent = loan.quantity;
+
+                        // Dates
+                        document.getElementById('createdDate').textContent = formatDate(loan.createdAt);
+                        document.getElementById('loanDate').textContent = formatDate(loan.loanDate);
+                        document.getElementById('dueDate').textContent = formatDate(loan.dueDate);
+
+                        // Timeline
+                        if (loan.status === 'APPROVED' || loan.status === 'RETURNED') {
+                            document.getElementById('approvalTimeline').style.display = 'flex';
+                            document.getElementById('approvalDate').textContent = formatDate(loan.approvalDate || loan
+                                .updatedAt);
+                            document.getElementById('approverName').textContent = (loan.approver && loan.approver
+                                .fullName) || 'System';
+                        }
+
+                        if (loan.status === 'RETURNED') {
+                            document.getElementById('returnTimeline').style.display = 'flex';
+                            document.getElementById('returnDate').textContent = formatDate(loan.returnDate || loan
+                                .updatedAt);
+                            document.getElementById('returnCondition').textContent = loan.returnCondition || '-';
+                        }
+
+                        // Notes
+                        document.getElementById('notes').textContent = loan.notes || 'Tidak ada catatan';
+
+                        // Action buttons
+                        renderActionButtons(loan);
+
+                        // Show content
+                        document.getElementById('loading').classList.add('hidden');
+                        document.getElementById('content').classList.remove('hidden');
+                    }
+
+                    function renderActionButtons(loan) {
+                        const actionButtons = document.getElementById('actionButtons');
+                        actionButtons.innerHTML = '';
+
+                        const backBtn = document.createElement('button');
+                        backBtn.onclick = () => window.history.back();
+                        backBtn.textContent = 'Kembali';
+                        backBtn.className =
+                            'flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-medium';
+                        actionButtons.appendChild(backBtn);
+
+                        if (loan.status === 'PENDING') {
+                            const approveBtn = document.createElement('button');
+                            approveBtn.onclick = () => approveLoan();
+                            approveBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Setujui';
+                            approveBtn.className =
+                                'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium';
+                            actionButtons.appendChild(approveBtn);
+
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.onclick = () => rejectLoan();
+                            rejectBtn.innerHTML = '<i class="fas fa-times mr-2"></i>Tolak';
+                            rejectBtn.className =
+                                'flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium';
+                            actionButtons.appendChild(rejectBtn);
+                        }
+
+                        if (loan.status === 'APPROVED') {
+                            const returnBtn = document.createElement('button');
+                            returnBtn.onclick = () => openReturnModal();
+                            returnBtn.innerHTML = '<i class="fas fa-undo mr-2"></i>Kembalikan';
+                            returnBtn.className =
+                                'flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium';
+                            actionButtons.appendChild(returnBtn);
+                        }
+                    }
+
+                    function getStatusColor(status) {
+                        const colors = {
+                            'PENDING': 'bg-yellow-100 text-yellow-800',
+                            'APPROVED': 'bg-green-100 text-green-800',
+                            'REJECTED': 'bg-red-100 text-red-800',
+                            'RETURNED': 'bg-gray-100 text-gray-800'
+                        };
+                        return colors[status] || 'bg-gray-100 text-gray-800';
+                    }
+
+                    async function approveLoan() {
+                        if (!confirm('Setujui peminjaman ini?')) return;
+
+                        try {
+                            const response = await fetch(`/api/loans/${loanId}/approve`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Gagal menyetujui');
+                            showSuccess('Peminjaman disetujui');
+                            setTimeout(() => loadLoan(), 1500);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    }
+
+                    async function rejectLoan() {
+                        if (!confirm('Tolak peminjaman ini?')) return;
+
+                        try {
+                            const response = await fetch(`/api/loans/${loanId}/reject`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!response.ok) throw new Error('Gagal menolak');
+                            showSuccess('Peminjaman ditolak');
+                            setTimeout(() => window.history.back(), 1500);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    }
+
+                    function openReturnModal() {
+                        document.getElementById('returnModal').classList.remove('hidden');
+                    }
+
+                    function closeReturnModal() {
+                        document.getElementById('returnModal').classList.add('hidden');
+                    }
+
+                    async function submitReturn() {
+                        const condition = document.getElementById('returnCondition').value;
+                        if (!condition) {
+                            showError('Pilih kondisi barang');
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`/api/loans/${loanId}/return`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify({
+                                    condition
+                                })
+                            });
+
+                            if (!response.ok) throw new Error('Gagal mengembalikan');
+                            showSuccess('Barang berhasil dikembalikan');
+                            closeReturnModal();
+                            setTimeout(() => loadLoan(), 1500);
+                        } catch (error) {
+                            showError(error.message);
+                        }
+                    }
+
+                    function formatDate(dateString) {
+                        if (!dateString) return '-';
+                        return new Date(dateString).toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+
+                    function showSuccess(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    function showError(message) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                        toast.textContent = message;
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    }
+
+                    loadLoan();
+                </script>
+            </main>
+        </div>
+        <script>
+            async function logout() {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        </script>
+    </body>
+
+</html>

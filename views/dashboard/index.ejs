@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - Inventory Management System</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    </head>
+
+    <body class="bg-gray-50">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-600">📦 IMS</h1>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Sidebar & Content -->
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-900 text-white p-6 min-h-screen">
+                <ul class="space-y-4">
+                    <li><a href="/dashboard" class="block px-4 py-2 rounded-lg bg-blue-600">🏠 Dashboard</a></li>
+                    <li><a href="/items" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📦 Barang</a></li>
+                    <li><a href="/loans" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📋 Peminjaman</a></li>
+                    <li><a href="/reports" class="block px-4 py-2 rounded-lg hover:bg-gray-800">📊 Laporan</a></li>
+                    <li><a href="/users" class="block px-4 py-2 rounded-lg hover:bg-gray-800">👥 User</a></li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-8">Dashboard</h1>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Barang -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm">Total Barang</p>
+                                <p id="totalItems" class="text-3xl font-bold text-blue-600">0</p>
+                            </div>
+                            <div class="text-5xl text-blue-200">📦</div>
+                        </div>
+                    </div>
+
+                    <!-- Barang Tersedia -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm">Tersedia</p>
+                                <p id="availableItems" class="text-3xl font-bold text-green-600">0</p>
+                            </div>
+                            <div class="text-5xl text-green-200">✓</div>
+                        </div>
+                    </div>
+
+                    <!-- Barang Dipinjam -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm">Dipinjam</p>
+                                <p id="borrowedItems" class="text-3xl font-bold text-yellow-600">0</p>
+                            </div>
+                            <div class="text-5xl text-yellow-200">📤</div>
+                        </div>
+                    </div>
+
+                    <!-- Barang Rusak -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-600 text-sm">Rusak</p>
+                                <p id="damagedItems" class="text-3xl font-bold text-red-600">0</p>
+                            </div>
+                            <div class="text-5xl text-red-200">⚠️</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Inventory Distribution Chart -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Distribusi Barang</h2>
+                        <canvas id="itemStatusChart" style="max-height: 250px;"></canvas>
+                    </div>
+
+                    <!-- Loan Status Chart -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Status Peminjaman</h2>
+                        <canvas id="loanStatusChart" style="max-height: 250px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Peminjaman Terbaru</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">User</th>
+                                    <th class="px-4 py-2 text-left">Barang</th>
+                                    <th class="px-4 py-2 text-left">Tanggal</th>
+                                    <th class="px-4 py-2 text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentLoansTable">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-gray-500">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            async function loadDashboardData() {
+                try {
+                    const response = await fetch('/api/reports/dashboard/stats');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const stats = data.data;
+
+                        // Update statistics cards
+                        document.getElementById('totalItems').textContent = stats.items.total;
+                        document.getElementById('availableItems').textContent = stats.items.available;
+                        document.getElementById('borrowedItems').textContent = stats.items.borrowed;
+                        document.getElementById('damagedItems').textContent = stats.items.damaged;
+
+                        // Update charts
+                        updateCharts(stats);
+
+                        // Update recent loans table
+                        updateRecentLoans(stats.recentLoans);
+                    }
+                } catch (error) {
+                    console.error('Error loading dashboard:', error);
+                }
+            }
+
+            function updateCharts(stats) {
+                // Item Status Chart
+                const itemStatusCtx = document.getElementById('itemStatusChart').getContext('2d');
+                new Chart(itemStatusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tersedia', 'Dipinjam', 'Rusak'],
+                        datasets: [{
+                            data: [stats.items.available, stats.items.borrowed, stats.items.damaged],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+
+                // Loan Status Chart
+                const loanStatusCtx = document.getElementById('loanStatusChart').getContext('2d');
+                new Chart(loanStatusCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Pending', 'Approved', 'Rejected', 'Returned'],
+                        datasets: [{
+                            label: 'Peminjaman',
+                            data: [
+                                stats.loans.pending,
+                                stats.loans.approved,
+                                stats.loans.rejected,
+                                stats.loans.returned
+                            ],
+                            backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6'],
+                            borderColor: ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateRecentLoans(loans) {
+                const tableBody = document.getElementById('recentLoansTable');
+                if (loans.length === 0) {
+                    tableBody.innerHTML =
+                        '<tr><td colspan="4" class="text-center py-4 text-gray-500">Tidak ada data</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = loans.map(loan => `
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-4 py-2">${loan.user ? loan.user.fullName : '-'}</td>
+          <td class="px-4 py-2">${loan.item ? loan.item.itemName : '-'}</td>
+          <td class="px-4 py-2">${new Date(loan.createdAt).toLocaleDateString('id-ID')}</td>
+          <td class="px-4 py-2">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold
+              ${loan.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                loan.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'}">
+              ${loan.status}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+            }
+
+            function logout() {
+                if (confirm('Apakah Anda yakin ingin logout?')) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                }
+            }
+
+            // Load data on page load
+            loadDashboardData();
+            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+        </script>
+    </body>
+
+</html>
